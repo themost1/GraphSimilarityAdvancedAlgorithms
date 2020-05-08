@@ -24,6 +24,32 @@ def get_eigenvalues(g):
 	e = e[::-1]
 	return e
 
+def get_nx_graph(g):
+	G = nx.Graph()
+	
+	for i in range(0, len(g["aa"])):
+		G.add_node(i)
+		
+	for i in range(0, G.number_of_nodes()):
+		for j in range(0, G.number_of_nodes()):
+			if (not (i==j)) and g["adj_contact_map"][i][j] == 1:
+				edge_length = 1 / g["adj_inverse_dcalpha"][i][j]
+				G.add_edge(i, j, weight = edge_length)
+				
+	return G
+				
+				
+
+
+def ISMAGS_method(g1, g2):
+	gr1 = get_nx_graph(g1)
+	gr2 = get_nx_graph(g2)
+	ismags = nx.isomorphism.ISMAGS(gr1, gr2)
+	lcs = list(ismags.largest_common_subgraph(symmetry=False))
+	print(len(lcs))
+	print(len(lcs[0]))
+	
+
 # performs eigenvalue method on graphs g1, g2
 def eigenvalue_method(g1, g2):
 	eig1 = get_eigenvalues(g1)
@@ -48,10 +74,24 @@ def eigenvalue_method(g1, g2):
 		dist += pow(eig1[i] - eig2[i], 2)
 		
 	return dist
-		
 
-eig_res = eigenvalue_method(vals[0], vals[1])
-print(eig_res)
+
+for i in range(0, 1):
+	for j in range(0, 1):
+		res = ISMAGS_method(vals[i], vals[j])
+	
+"""
+for i in range(0, len(vals)):
+	for j in range(0, len(vals)):
+		eig_res = eigenvalue_method(vals[i], vals[j])
+		print(eig_res)
+"""
+
+
+
+
+
+
 
 """
 for graph_index in range(0, 2):
