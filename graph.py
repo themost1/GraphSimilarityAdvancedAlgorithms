@@ -1,13 +1,19 @@
 import pickle
 import networkx as nx
+import numpy as np
 import numpy.linalg
 from scipy.sparse.csgraph import laplacian
 
+vals = []
+pkls = ["1", "2", "6", "10", "13", "16"]
 
-fileObject = open("cuprotein_graph_1.pkl",'rb') 
-b = pickle.load(fileObject)
-done = False
-vals = list(b.values())
+for i in range(0, len(pkls)):
+	fileObject = open("cuprotein_graph_6.pkl",'rb') 
+	b = pickle.load(fileObject)
+	these_vals = list(b.values())	
+	vals += these_vals
+
+
 
 graphs = list()
 
@@ -35,6 +41,10 @@ def get_nx_graph(g):
 			if (not (i==j)) and g["adj_contact_map"][i][j] == 1:
 				edge_length = 1 / g["adj_inverse_dcalpha"][i][j]
 				G.add_edge(i, j, weight = edge_length)
+				G.add_edge(j, i, weight = edge_length)
+				
+	print(G.number_of_nodes())
+	print(G.number_of_edges())
 				
 	return G
 				
@@ -76,10 +86,31 @@ def eigenvalue_method(g1, g2):
 	return dist
 
 
+for i in range(0, len(vals)):
+	for j in range(0, len(vals)):
+		good = False
+		if not (i == j):
+			good = True
+			if len(vals[i]["aa"]) == len(vals[j]["aa"]):
+				for k in range(0, len(vals[i]["aa"])):
+					if not np.array_equal(vals[i]["aa"][k], vals[j]["aa"][k]):
+						good = False
+						break
+			else:
+				good = False
+						
+		if good:
+			print(str(i)+" "+str(j))
+
+
+
+
+"""
 for i in range(0, 1):
 	for j in range(0, 1):
-		res = ISMAGS_method(vals[i], vals[j])
-	
+		res = ISMAGS_method(vals[75], vals[88])
+"""
+
 """
 for i in range(0, len(vals)):
 	for j in range(0, len(vals)):
