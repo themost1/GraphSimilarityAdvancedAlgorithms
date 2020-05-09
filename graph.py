@@ -10,7 +10,9 @@ import math
 vals = []
 pkls = glob.glob("./*.pkl")
 
-for i in range(0, len(pkls)):
+max_pkls = 20
+num_pkls_load = min(max_pkls, len(pkls))
+for i in range(0, num_pkls_load):
 	fileObject = open(pkls[i],'rb') 
 	b = pickle.load(fileObject)
 	these_vals = list(b.values())	
@@ -118,18 +120,65 @@ def rmsd(g1, g2):
 	sum = math.sqrt(sum)
 	return sum
 
+def sim_score_method(g1, g2):
+	cutoff = 0.0001
+	d = []
+	row = []
+	adj1 = g1["adj_contact_map"]
+	adj2 = g2["adj_contact_map"]
+	s = np.identity(len(adj1))
+	for i in range(0, len(adj1)):
+		row.append(0.5)
+	for i in range(0, len(adj1)):
+		d.append(row)
+		
+	while True:
+		prod1 = np.matmul(adj1, s)
+		prod1 = np.matmul(prod1, adj2)
+		prod2 = np.matmul(adj1.transpose(), s)
+		prod2 = np.matmul(prod2, adj2.transpose())
+		sum = prod1 + prod2 + d
+		norm = np.linalg.norm(sum)
+		new_s = sum / norm
+		diff = (s - new_s).sum()
+		s = new_s
+		diff = abs(diff)
+		if (diff < cutoff):
+			break
+
+	return s.sum()
+		
+	
+def edge_test(g1, g2):
+	sum = 0
+	adj1 = g1["adj_contact_map"]
+	adj2 = g2["adj_contact_map"]
+	for i in range(0, len(adj1)):
+		for j in range(0, len(adj1[i])):
+			if adj1[i][j] != adj2[i][j]:
+				sum+=1
+	
+	return sum
+	
+
 def test_similarity(i1, i2):
 	g1 = vals[i1]
 	g2 = vals[i2]
 	print("Indices: " + str(i1) + " " + str(i2))
+	
 	eig_res = eigenvalue_method(g1, g2)
 	print("Eigenvalue method: " + str(eig_res))
 	euc_res = euclidean_method(g1, g2)
 	print("Euclidean method: " + str(euc_res))
 	rmsd_res = rmsd(g1, g2)
 	print("RMSD: " + str(rmsd_res))
-	
+	sim_score_res = sim_score_method(g1, g2)
+	print("Iterative sim. score: " + str(sim_score_res))
+	edge_res = edge_test(g1, g2)
+	print("Edge score: " + str(edge_res))
 	print()
+
+	
 	
 	
 # returns True if graphs have same residue but are different
