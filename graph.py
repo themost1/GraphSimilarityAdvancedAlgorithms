@@ -3,15 +3,20 @@ import networkx as nx
 import numpy as np
 import numpy.linalg
 from scipy.sparse.csgraph import laplacian
+import glob
+import math
+
 
 vals = []
-pkls = ["1", "2", "6", "10", "13", "16"]
+pkls = glob.glob("./*.pkl")
 
 for i in range(0, len(pkls)):
-	fileObject = open("cuprotein_graph_6.pkl",'rb') 
+	fileObject = open(pkls[i],'rb') 
 	b = pickle.load(fileObject)
 	these_vals = list(b.values())	
 	vals += these_vals
+	
+print("loaded: " + str(len(pkls)))
 
 
 
@@ -85,22 +90,67 @@ def eigenvalue_method(g1, g2):
 		
 	return dist
 
+def euclidean_method(g1, g2):
+	sum = 0
+	minlen = min(len(g1["aa"]), len(g2["aa"]))
+	for i in range(0, minlen):
+		minisum = 0
+		for j in range(0, 3):
+			diff = g1["calpha_coord"][i][j] - g2["calpha_coord"][i][j]
+			diff = diff*diff
+			minisum += diff
+		sum += minisum
+	sum /= minlen
+	sum = math.sqrt(sum)
+	return sum
+
+def rmsd(g1, g2):
+	sum = 0
+	minlen = min(len(g1["aa"]), len(g2["aa"]))
+	for i in range(0, minlen):
+		minisum = 0
+		for j in range(0, 3):
+			diff = g1["calpha_coord"][i][j] - g2["calpha_coord"][i][j]
+			diff = diff*diff
+			minisum += diff
+		sum += minisum * minisum
+	sum /= minlen
+	sum = math.sqrt(sum)
+	return sum
+
+def test_similarity(i1, i2):
+	g1 = vals[i1]
+	g2 = vals[i2]
+	print("Indices: " + str(i1) + " " + str(i2))
+	eig_res = eigenvalue_method(g1, g2)
+	print("Eigenvalue method: " + str(eig_res))
+	euc_res = euclidean_method(g1, g2)
+	print("Euclidean method: " + str(euc_res))
+	rmsd_res = rmsd(g1, g2)
+	print("RMSD: " + str(rmsd_res))
+	
+	print()
+	
+	
+# returns True if graphs have same residue but are different
+def valid_comparison(i1, i2):
+	g1 = vals[i1]
+	g2 = vals[i2]
+
+	if (len(g1["aa"]) != len(g2["aa"])):
+		return False
+
+	if np.array_equal(g1["calpha_coord"], g2["calpha_coord"]):
+		return False
+	
+	return True
+	
 
 for i in range(0, len(vals)):
 	for j in range(0, len(vals)):
-		good = False
-		if not (i == j):
-			good = True
-			if len(vals[i]["aa"]) == len(vals[j]["aa"]):
-				for k in range(0, len(vals[i]["aa"])):
-					if not np.array_equal(vals[i]["aa"][k], vals[j]["aa"][k]):
-						good = False
-						break
-			else:
-				good = False
-						
-		if good:
-			print(str(i)+" "+str(j))
+		if valid_comparison(i, j):
+			print("valid")
+			test_similarity(i, j)
 
 
 
