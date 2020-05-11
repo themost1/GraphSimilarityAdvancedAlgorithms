@@ -147,8 +147,41 @@ def sim_score_method(g1, g2):
 			break
 
 	return s.sum()
-		
-	
+
+""" Quadratic time approx of GED using Hausdorff matching, chosen just because it was recent,
+and there is some testing of it with molecule graphs, and it's quadratic not cubic
+"""
+"""
+we may need to play around with cost function, I don't how we want to judge weighing nodes against
+each other, like if replacing high degree node with a low one is high cost or not idk.
+Probably best thing to do is something with the edge weights.
+"""
+def cost(u,v):
+	return 1
+def hed_set(a,b,cost):
+	ca = []
+	cb = []
+
+	for i in range(0,len(a)):
+		ca[x] = cost(a,none)
+	for j in range(0,len(b)):
+		cb[y] = cost(b,none)
+
+	for x in range(0,len(a)):
+		for y in range(0,len(b)):
+			ca[x] = min(cost(a[x],b[y])/2,ca[x])
+			cb[y] = min(cost(a[x],b[y])/2,cb[x])
+
+	cost = sum(ca) + sum(cb)
+def hed_graph(g1, g2, cost):
+	sum = 0
+	adj1 = g1["adj_contact_map"]
+	adj2 = g2["adj_contact_map"]
+
+""" Most of our graphs have the same number of nodes,and
+similar node ordering, so we can just do edge comparisons to get a hopefully
+good edit distance - need to test this lol.
+"""
 def edge_test(g1, g2):
 	sum = 0
 	adj1 = g1["adj_contact_map"]
@@ -195,11 +228,12 @@ def valid_comparison(i1, i2):
 	return True
 	
 
-for i in range(0, len(vals)):
-	for j in range(0, len(vals)):
-		if valid_comparison(i, j):
-			print("valid")
-			test_similarity(i, j)
+def compare_all():
+	for i in range(0, len(vals)):
+		for j in range(0, len(vals)):
+			if valid_comparison(i, j):
+				print("valid")
+				test_similarity(i, j)
 
 
 
