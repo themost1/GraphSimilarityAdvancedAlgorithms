@@ -179,18 +179,39 @@ def hed_graph(g1, g2, cost):
 	adj1 = g1["adj_contact_map"]
 	adj2 = g2["adj_contact_map"]
 
+
+
+def cost_simple(i, j, g1, g2):
+	return 1
+	
+def cost_hausdorff(i, j, g1, g2):
+	return 1
+	
+def cost_weighted(i, j, g1, g2):
+	adj1 = g1["adj_contact_map"]
+	adj2 = g2["adj_contact_map"]
+	sum = 0
+	for k in range(0, len(adj1[i])):
+		sum += adj1[i][k]
+		sum += adj1[j][k]
+		sum += adj2[i][k]
+		sum += adj2[j][k]
+		
+	sum /= 4 * len(adj1[i])
+	return sum
+
 """ Most of our graphs have the same number of nodes,and
 similar node ordering, so we can just do edge comparisons to get a hopefully
 good edit distance - need to test this lol.
 """
-def edge_test(g1, g2):
+def edge_test(g1, g2, cost):
 	sum = 0
 	adj1 = g1["adj_contact_map"]
 	adj2 = g2["adj_contact_map"]
 	for i in range(0, len(adj1)):
 		for j in range(0, len(adj1[i])):
 			if adj1[i][j] != adj2[i][j]:
-				sum+=1
+				sum += cost(i, j, g1, g2)
 	
 	return sum
 	
@@ -208,8 +229,12 @@ def test_similarity(i1, i2):
 	print("RMSD: " + str(rmsd_res))
 	sim_score_res = sim_score_method(g1, g2)
 	print("Iterative sim. score: " + str(sim_score_res))
-	edge_res = edge_test(g1, g2)
-	print("Edge score: " + str(edge_res))
+	edge_res = edge_test(g1, g2, cost_simple)
+	print("Edge score simple: " + str(edge_res))
+	edge_res = edge_test(g1, g2, cost_hausdorff)
+	print("Edge score Hausdorff: " + str(edge_res))
+	edge_res = edge_test(g1, g2, cost_weighted)
+	print("Edge score weighted: " + str(edge_res))
 	print()
 
 	
