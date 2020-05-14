@@ -7,6 +7,7 @@ import glob
 import math
 import random
 import copy
+import time
 
 
 vals = []
@@ -24,6 +25,7 @@ for i in range(0, num_pkls_load):
 print("loaded: " + str(num_pkls_load))
 
 
+curr_time = lambda: int(round(time.time() * 1000))
 
 graphs = list()
 
@@ -296,20 +298,50 @@ def test_similarity(i1, i2):
 	g2 = vals[i2]
 	print("Indices: " + str(i1) + " " + str(i2))
 	
+	ct = curr_time()
 	eig_res = eigenvalue_method(g1, g2)
+	ct2 = curr_time()
 	print("Eigenvalue method: " + str(eig_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+	
+	
 	euc_res = euclidean_method(g1, g2)
+	ct2 = curr_time()
 	print("Euclidean method: " + str(euc_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	rmsd_res = rmsd(g1, g2)
+	ct2 = curr_time()
 	print("RMSD: " + str(rmsd_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	sim_score_res = sim_score_method(g1, g2)
+	ct2 = curr_time()
 	print("Iterative sim. score: " + str(sim_score_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	edge_res = edge_test(g1, g2, cost_simple)
+	ct2 = curr_time()
 	print("Edge score simple: " + str(edge_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	edge_res = edge_test(g1, g2, cost_hausdorff)
+	ct2 = curr_time()
 	print("Edge score Hausdorff: " + str(edge_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	edge_res = edge_test(g1, g2, cost_weighted)
+	ct2 = curr_time()
 	print("Edge score weighted: " + str(edge_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	print()
 
 	
@@ -341,20 +373,50 @@ def test_similarity_constructed(i):
 	g2 = vals_comp[i]
 	print("Index: " + str(i))
 	
+	ct = curr_time()
 	eig_res = eigenvalue_method(g1, g2)
+	ct2 = curr_time()
 	print("Eigenvalue method: " + str(eig_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+	
+	
 	euc_res = euclidean_method(g1, g2)
+	ct2 = curr_time()
 	print("Euclidean method: " + str(euc_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	rmsd_res = rmsd(g1, g2)
+	ct2 = curr_time()
 	print("RMSD: " + str(rmsd_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	sim_score_res = sim_score_method(g1, g2)
+	ct2 = curr_time()
 	print("Iterative sim. score: " + str(sim_score_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	edge_res = edge_test(g1, g2, cost_simple)
+	ct2 = curr_time()
 	print("Edge score simple: " + str(edge_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	edge_res = edge_test(g1, g2, cost_hausdorff)
+	ct2 = curr_time()
 	print("Edge score Hausdorff: " + str(edge_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	edge_res = edge_test(g1, g2, cost_weighted)
+	ct2 = curr_time()
 	print("Edge score weighted: " + str(edge_res))
+	print("(^^ took " + str(ct2 - ct) + " ms)")
+	ct = ct2
+
 	print(flush=True)
 
 	
