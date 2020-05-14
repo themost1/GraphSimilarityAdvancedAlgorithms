@@ -262,14 +262,12 @@ def cost_weighted(i, j, g1, g2):
 	adj1 = g1["adj_contact_map"]
 	adj2 = g2["adj_contact_map"]
 	sum = 0
-	for k in range(0, len(adj1[i])):
-		sum += adj1[i][k]
-		sum += adj1[j][k]
-		sum += adj2[i][k]
-		sum += adj2[j][k]
+	g_use = g1
+	if g2["adj_contact_map"][i][j] == 1:
+		g_use = g2
 		
-	sum /= 4 * len(adj1[i])
-	return sum
+	# inverse of distance between points i and j
+	return g_use["adj_inverse_dcalpha"][i][j]
 
 """ Most of our graphs have the same number of nodes,and
 similar node ordering, so we can just do edge comparisons to get a hopefully
