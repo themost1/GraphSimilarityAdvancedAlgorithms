@@ -160,29 +160,96 @@ we may need to play around with cost function, I don't how we want to judge weig
 each other, like if replacing high degree node with a low one is high cost or not idk.
 Probably best thing to do is something with the edge weights.
 """
-def cost(u,v):
+"""
+u,v are edges so they should contain some edge information
+"""
+def lower_vertex(u,v,g1,g2,cost):
+	adj1 = g1["adj_contact_map"]
+	adj2 = g2["adj_contact_map"]
+	p = []
+	q = []
+
+	for i in range(0,len(adj1[u])):
+		if adj1[u][i] == 1:
+			p.append(i)
+	for i in range(0,len(adj2[v])):
+		if adj2[v][i] == 1:
+			q.append(i)
+	if len(p)>len(q):
+		mincost = math.inf
+		for i in range(0,len(p)):
+			mincost = min(mincost,cost(p[i],none,g1,g2))
+		return (len(p)-len(q))*mincost
+	else:
+		mincost = math.inf
+		for i in range(0,len(q)):
+			mincost = min(mincost,cost(none,q[i],g1,g2))
+		return (len(q)-len(p))*mincost
+def lower_graph(g1,g2,cost):
+	v1 = len(g1("adj_contact_map"))
+	v2 = len(g2("adj_contact_map"))
+	
+	
+	if v1 > v2:
+		mincost = math.inf
+		for i in range(0,v1):
+			mincost = min(mincost,cost(i,none,g1,g2))
+		return (v1-v2)*mincost
+	else:
+		mincost = math.inf
+		for i in range(0,v2):
+			mincost = min(mincost,cost(none,i,g1,g2))
+			return (v2-v1)*mincost
+def cost(u,v,g1,g2):
 	return 1
-def hed_set(a,b,cost):
+"""a and b are the sets of edges"""
+def hed_set(a,b,g1,g2,cost):
 	ca = []
 	cb = []
 
 	for i in range(0,len(a)):
-		ca[x] = cost(a,none)
+		ca[x] = cost(a,none,g1,g2)
 	for j in range(0,len(b)):
-		cb[y] = cost(b,none)
+		cb[y] = cost(b,none,g1,g2)
 
 	for x in range(0,len(a)):
 		for y in range(0,len(b)):
-			ca[x] = min(cost(a[x],b[y])/2,ca[x])
-			cb[y] = min(cost(a[x],b[y])/2,cb[x])
+			ca[x] = min(cost(a[x],b[y],g1,g2)/2,ca[x])
+			cb[y] = min(cost(a[x],b[y],g1,g2)/2,cb[x])
 
-	cost = sum(ca) + sum(cb)
+	return sum(ca) + sum(cb)
 def hed_graph(g1, g2, cost):
 	sum = 0
 	adj1 = g1["adj_contact_map"]
 	adj2 = g2["adj_contact_map"]
+	d1 = []
+	edges1 = []
+	edges2 = []
+	for u in range(0,len(adj1)):
+		for e in range(0,len(adj1)):
+			if adj1[u][e] == 1:
+				edges1.append(cost(j,none,g1,g2)/2)
+		d1[i] = cost(i,none)+sum(edges)
 
+	d2 = []
+	for v in range(0,len(adj2)):
+		edges = []
+		for e in range(0,len(adj2)):
+			if adj1[v][e] == 1:
+				edges2.append(cost(j,none,g1,g2)/2)
+		d2[v] = cost(v,none,g1,g2)+sum(edges)
 
+	for u in range(0,len(adj1)):
+		for v in range(0,len(adj2)):
+			cost_edges = cost_hed(edges1,edges2,g1,g2,cost)
+			cost_edges = max(lower_vertex(u,v,g1,g2),cost_edges)
+			
+			d1[u] = min((cost(u,v,g1,g2)+cost_edges/2)/2,d1[u])
+			d2[v] = min((cost(u,v,g1,g2)+cost_edges/2)/2,d2[v])
+	d = sum(d1)+sum(d2)
+	d = max(lower_graph(g1,g2),d)
+
+	return d
 
 def cost_simple(i, j, g1, g2):
 	return 1
