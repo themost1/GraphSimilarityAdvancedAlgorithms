@@ -140,9 +140,12 @@ def sim_score_method(g1, g2):
 		sum = prod1 + prod2 + d
 		norm = np.linalg.norm(sum)
 		new_s = sum / norm
-		diff = (s - new_s).sum()
+		
+		diff = 0
+		for i in range(0, len(s)):
+			for j in range(0, len(s)):
+				diff += abs(s[i][j] - new_s[i][j])
 		s = new_s
-		diff = abs(diff)
 		if (diff < cutoff):
 			break
 
