@@ -161,13 +161,10 @@ def sim_score_method(g1, g2):
 	return s.sum()
 
 
-""" Quadratic time approx of GED using Hausdorff matching, chosen just because it was recent,
-and there is some testing of it with molecule graphs, and it's quadratic not cubic
-"""
-"""
-we may need to play around with cost function, I don't how we want to judge weighing nodes against
-each other, like if replacing high degree node with a low one is high cost or not idk.
-Probably best thing to do is something with the edge weights.
+""" Quadratic time approx of GED using Hausdorff matching,
+chosen just because it was recent,
+and there is some testing of it with molecule graphs,
+and it's quadratic not cubic
 """
 """
 u,v are edges so they should contain some edge information
@@ -278,8 +275,8 @@ def cost_weighted(i, j, g1, g2):
 	return g_use["adj_inverse_dcalpha"][i][j]
 
 """ We are looking at graphs with the same number of nodes,and
-similar node ordering, so we can just do edge comparisons to get a hopefully
-good edit distance.
+similar node ordering, so we can just do edge comparisons
+to get a hopefully good edit distance.
 """
 def edge_test(g1, g2, cost):
 	sum = 0
@@ -368,6 +365,19 @@ def compare_all():
 				print("valid")
 				test_similarity(i, j)
 
+
+eig_scores = []
+rmsd_scores = []
+sim_scores = []
+edge_simple_scores = []
+edge_weighted_scores = []
+
+eig_times = []
+rmsd_times = []
+sim_times = []
+edge_simple_times = []
+edge_weighted_times = []
+
 def test_similarity_constructed(i):
 	g1 = vals[i]
 	g2 = vals_comp[i]
@@ -376,47 +386,41 @@ def test_similarity_constructed(i):
 	ct = curr_time()
 	eig_res = eigenvalue_method(g1, g2)
 	ct2 = curr_time()
-	print("Eigenvalue method: " + str(eig_res))
-	print("(^^ took " + str(ct2 - ct) + " ms)")
+	eig_scores.append(eig_res)
+	eig_times.append(ct2 - ct)
 	ct = ct2
-	
 	
 	euc_res = euclidean_method(g1, g2)
 	ct2 = curr_time()
-	print("Euclidean method: " + str(euc_res))
-	print("(^^ took " + str(ct2 - ct) + " ms)")
 	ct = ct2
 
 	rmsd_res = rmsd(g1, g2)
 	ct2 = curr_time()
-	print("RMSD: " + str(rmsd_res))
-	print("(^^ took " + str(ct2 - ct) + " ms)")
+	rmsd_scores.append(rmsd_res)
+	rmsd_times.append(ct2 - ct)
 	ct = ct2
 
 	sim_score_res = sim_score_method(g1, g2)
 	ct2 = curr_time()
-	print("Iterative sim. score: " + str(sim_score_res))
-	print("(^^ took " + str(ct2 - ct) + " ms)")
+	sim_scores.append(sim_score_res)
+	sim_times.append(ct2 - ct)
 	ct = ct2
 
 	edge_res = edge_test(g1, g2, cost_simple)
 	ct2 = curr_time()
-	print("Edge score simple: " + str(edge_res))
-	print("(^^ took " + str(ct2 - ct) + " ms)")
+	edge_simple_scores.append(edge_res)
+	edge_simple_times.append(ct2 - ct)
 	ct = ct2
 
 	edge_res = edge_test(g1, g2, cost_hausdorff)
 	ct2 = curr_time()
-	print("Edge score Hausdorff: " + str(edge_res))
-	print("(^^ took " + str(ct2 - ct) + " ms)")
 	ct = ct2
 
 	edge_res = edge_test(g1, g2, cost_weighted)
 	ct2 = curr_time()
-	print("Edge score weighted: " + str(edge_res))
-	print("(^^ took " + str(ct2 - ct) + " ms)")
+	edge_weighted_scores.append(edge_res)
+	edge_weighted_times.append(ct2 - ct)
 	ct = ct2
-
 	print(flush=True)
 
 	
@@ -441,6 +445,19 @@ def compare_all_constructed():
 		if valid_comparison_constructed(i):
 				print("valid")
 				test_similarity_constructed(i)
+				
+		print(eig_scores[i])
+		print(rmsd_scores[i])
+		print(sim_scores[i])
+		print(edge_simple_scores[i])
+		print(edge_weighted_scores[i])
+		
+		print(eig_times[i])
+		print(rmsd_times[i])
+		print(sim_times[i])
+		print(edge_simple_times[i])
+		print(edge_weighted_times[i])
+		print()
 
 vals_comp = []
 def construct_comp_graphs():
@@ -451,8 +468,9 @@ def construct_comp_graphs():
 			for j in range(0, len(to_add["aa"])):
 				curr_dist = 1/to_add["adj_inverse_dcalpha"][i][j]
 				add_num = random.uniform(-1 * curr_dist/3, curr_dist/3)
-				to_add["adj_inverse_dcalpha"][i][j] = 1/(curr_dist + add_num)
-				to_add["adj_inverse_dcalpha"][j][i] = 1/(curr_dist + add_num)
+				new_val = 1/(curr_dist + add_num)
+				to_add["adj_inverse_dcalpha"][i][j] = new_val
+				to_add["adj_inverse_dcalpha"][j][i] = new_val
 				
 				if curr_dist + add_num > 10:
 					to_add["adj_contact_map"][i][j] = 0
@@ -464,51 +482,3 @@ def construct_comp_graphs():
 
 construct_comp_graphs()
 compare_all_constructed()
-
-
-"""
-for i in range(0, 1):
-	for j in range(0, 1):
-		res = ISMAGS_method(vals[75], vals[88])
-"""
-
-"""
-for i in range(0, len(vals)):
-	for j in range(0, len(vals)):
-		eig_res = eigenvalue_method(vals[i], vals[j])
-		print(eig_res)
-"""
-
-
-
-
-
-
-
-"""
-for graph_index in range(0, 2):
-
-	val = vals[graph_index]
-	print(len(val["aa"]))
-	print(len(val["aa"][0]))
-	print(len(val["adj_contact_map"]))
-	print(len(val["adj_contact_map"][0]))
-	print(len(val["adj_inverse_dcalpha"]))
-	print(len(val["adj_inverse_dcalpha"][0]))
-	print()
-	
-	
-	data = vals[graph_index]
-	G = nx.Graph()
-	
-	for i in range(0, len(data["aa"])):
-		G.add_node(i)
-		
-	for i in range(0, G.number_of_nodes()):
-		for j in range(0, G.number_of_nodes()):
-			if (not (i==j)) and data["adj_contact_map"][i][j] == 1:
-				edge_length = 1 / data["adj_inverse_dcalpha"][i][j]
-				G.add_edge(i, j, weight = edge_length)
-	
-	graphs.append(G)
-"""
