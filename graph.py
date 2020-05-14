@@ -107,18 +107,19 @@ def euclidean_method(g1, g2):
 	return sum
 
 def rmsd(g1, g2):
-	sum = 0
-	minlen = min(len(g1["aa"]), len(g2["aa"]))
-	for i in range(0, minlen):
-		minisum = 0
-		for j in range(0, 3):
-			diff = g1["calpha_coord"][i][j] - g2["calpha_coord"][i][j]
-			diff = diff*diff
-			minisum += diff
-		sum += minisum * minisum
-	sum /= minlen
-	sum = math.sqrt(sum)
-	return sum
+	dcalpha1 = g1['adj_inverse_dcalpha']
+	dcalpha1 = np.reciprocal(dcalpha1)
+	dcalpha1 = np.eye(np.shape(dcalpha1)[0]) - dcalpha1
+	dcalpha2 = g2['adj_inverse_dcalpha']
+	dcalpha2 = np.reciprocal(dcalpha2)
+	dcalpha2 = np.eye(np.shape(dcalpha2)[0]) - dcalpha2
+	total = np.shape(dcalpha2)[0]**2
+	tmp = dcalpha2 - dcalpha1
+	tmp = tmp**2
+	squared = np.sum(tmp)
+	mean_square = squared/total
+	rmsd_i = np.sqrt(mean_square)
+	return rmsd_i
 
 def sim_score_method(g1, g2):
 	cutoff = 0.0001
