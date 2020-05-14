@@ -5,13 +5,15 @@ import numpy.linalg
 from scipy.sparse.csgraph import laplacian
 import glob
 import math
+import random
+import copy
 
 
 vals = []
 pkls = glob.glob("./*.pkl")
 
 # Load our files of protein graphs
-max_pkls = 20
+max_pkls = 1
 num_pkls_load = min(max_pkls, len(pkls))
 for i in range(0, num_pkls_load):
 	fileObject = open(pkls[i],'rb') 
@@ -19,7 +21,7 @@ for i in range(0, num_pkls_load):
 	these_vals = list(b.values())	
 	vals += these_vals
 	
-print("loaded: " + str(len(pkls)))
+print("loaded: " + str(num_pkls_load))
 
 
 
@@ -328,13 +330,78 @@ def valid_comparison(i1, i2):
 	
 
 def compare_all():
-	for i in range(0, len(vals)):
-		for j in range(0, len(vals)):
+	for i in range(0, len(vals_comp)):
+		for j in range(0, len(vals_comp)):
 			if valid_comparison(i, j):
 				print("valid")
 				test_similarity(i, j)
 
-compare_all()
+def test_similarity_constructed(i):
+	g1 = vals[i]
+	g2 = vals_comp[i]
+	print("Index: " + str(i))
+	
+	eig_res = eigenvalue_method(g1, g2)
+	print("Eigenvalue method: " + str(eig_res))
+	euc_res = euclidean_method(g1, g2)
+	print("Euclidean method: " + str(euc_res))
+	rmsd_res = rmsd(g1, g2)
+	print("RMSD: " + str(rmsd_res))
+	sim_score_res = sim_score_method(g1, g2)
+	print("Iterative sim. score: " + str(sim_score_res))
+	edge_res = edge_test(g1, g2, cost_simple)
+	print("Edge score simple: " + str(edge_res))
+	edge_res = edge_test(g1, g2, cost_hausdorff)
+	print("Edge score Hausdorff: " + str(edge_res))
+	edge_res = edge_test(g1, g2, cost_weighted)
+	print("Edge score weighted: " + str(edge_res))
+	print(flush=True)
+
+	
+	
+	
+# returns True if graphs have same residue but are different
+def valid_comparison_constructed(i):
+	g1 = vals[i]
+	g2 = vals_comp[i]
+
+	if (len(g1["aa"]) != len(g2["aa"])):
+		return False
+
+	#if np.array_equal(g1["calpha_coord"], g2["calpha_coord"]):
+		#return False
+	
+	return True
+	
+
+def compare_all_constructed():
+	for i in range(0, len(vals_comp)):
+		if valid_comparison_constructed(i):
+				print("valid")
+				test_similarity_constructed(i)
+
+vals_comp = []
+def construct_comp_graphs():
+	num_comp = 20
+	for g in range(0, num_comp):
+		to_add = copy.deepcopy(vals[g])
+		for i in range(0, len(to_add["aa"])):
+			for j in range(0, len(to_add["aa"])):
+				curr_dist = 1/to_add["adj_inverse_dcalpha"][i][j]
+				add_num = random.uniform(-1 * curr_dist/3, curr_dist/3)
+				to_add["adj_inverse_dcalpha"][i][j] = 1/(curr_dist + add_num)
+				to_add["adj_inverse_dcalpha"][j][i] = 1/(curr_dist + add_num)
+				
+				if curr_dist + add_num > 10:
+					to_add["adj_contact_map"][i][j] = 0
+					to_add["adj_contact_map"][j][i] = 0
+				else:
+					to_add["adj_contact_map"][i][j] = 1
+					to_add["adj_contact_map"][j][i] = 1
+		vals_comp.append(to_add)
+
+construct_comp_graphs()
+compare_all_constructed()
 
 
 """
