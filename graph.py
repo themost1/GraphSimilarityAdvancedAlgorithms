@@ -10,6 +10,7 @@ import math
 vals = []
 pkls = glob.glob("./*.pkl")
 
+# Load our files of protein graphs
 max_pkls = 20
 num_pkls_load = min(max_pkls, len(pkls))
 for i in range(0, num_pkls_load):
@@ -37,6 +38,7 @@ def get_eigenvalues(g):
 	e = e[::-1]
 	return e
 
+# used with NetworkX library -- unused, but here just in case
 def get_nx_graph(g):
 	G = nx.Graph()
 	
@@ -55,9 +57,8 @@ def get_nx_graph(g):
 				
 	return G
 				
-				
-
-
+			
+#NetworkX function that is too costly to use
 def ISMAGS_method(g1, g2):
 	gr1 = get_nx_graph(g1)
 	gr2 = get_nx_graph(g2)
@@ -92,6 +93,7 @@ def eigenvalue_method(g1, g2):
 		
 	return dist
 
+# performs Euclidean method on graphs g1, g2
 def euclidean_method(g1, g2):
 	sum = 0
 	minlen = min(len(g1["aa"]), len(g2["aa"]))
@@ -106,6 +108,7 @@ def euclidean_method(g1, g2):
 	sum = math.sqrt(sum)
 	return sum
 
+# performs RMSD on graphs g1, g2
 def rmsd(g1, g2):
 	dcalpha1 = g1['adj_inverse_dcalpha']
 	dcalpha1 = np.reciprocal(dcalpha1)
@@ -121,6 +124,7 @@ def rmsd(g1, g2):
 	rmsd_i = np.sqrt(mean_square)
 	return rmsd_i
 
+# performs iterative similarity score method on graphs g1, g2
 def sim_score_method(g1, g2):
 	cutoff = 0.0001
 	d = []
@@ -269,9 +273,9 @@ def cost_weighted(i, j, g1, g2):
 	# inverse of distance between points i and j
 	return g_use["adj_inverse_dcalpha"][i][j]
 
-""" Most of our graphs have the same number of nodes,and
+""" We are looking at graphs with the same number of nodes,and
 similar node ordering, so we can just do edge comparisons to get a hopefully
-good edit distance - need to test this lol.
+good edit distance.
 """
 def edge_test(g1, g2, cost):
 	sum = 0
